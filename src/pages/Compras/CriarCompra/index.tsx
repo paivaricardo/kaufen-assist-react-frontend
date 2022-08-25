@@ -82,6 +82,10 @@ function CriarCompra() {
       if (response) {
         const produtosJson = await response.json();
         setListaProdutos(produtosJson);
+        setPrecoSelecionado(
+          produtosJson.filter((produto: any) => produto.id_produto === 1)[0]
+            .preco
+        );
       }
     }
 
@@ -139,10 +143,9 @@ function CriarCompra() {
             console.log(response);
           })
           .catch((error) => console.error(error));
-      
-          window.open("/compras");
-        }
- 
+
+        window.open("/compras");
+      }
     }
 
     fetchPostSubmit();
@@ -185,10 +188,10 @@ function CriarCompra() {
 
   function handleProdutoSelecionado(event: any) {
     setProdutoSelecionado(event.target.value);
-    console.log(produtoSelecionado);
+    console.log(event.target.value);
     setPrecoSelecionado(
       listaProdutos.filter(
-        (produto: any) => produto.id_produto === produtoSelecionado
+        (produto: any) => produto.id_produto === event.target.value
       )[0].preco
     );
   }
@@ -215,20 +218,19 @@ function CriarCompra() {
       ...arrayCompraProduto,
       [produtoSelecionado, qtdSelecionada, Date.now()],
     ]);
+
     setTotal(total + precoSelecionado * qtdSelecionada);
   }
 
-  function handleExcluirCompraProduto(compraProduto: any) {
-    let locationArray = arrayCompraProduto.indexOf(compraProduto);
+  function handleExcluirCompraProduto(index: any) {
+    let newArrayCompraProduto = arrayCompraProduto;
+    newArrayCompraProduto.splice(index, 1);
 
-    let newArrayCompraProduto = arrayCompraProduto.splice(
-      locationArray,
-      locationArray
-    );
+    console.log(newArrayCompraProduto);
 
     setArrayCompraProduto(newArrayCompraProduto);
 
-    let novoTotal = arrayCompraProduto.reduce((acc: number, cur: any) => {
+    let novoTotal = newArrayCompraProduto.reduce((acc: number, cur: any) => {
       return (
         acc +
         cur[1] *
@@ -408,7 +410,7 @@ function CriarCompra() {
                       aria-label="close"
                       color="error"
                       onClick={() => {
-                        handleExcluirCompraProduto(compraProduto);
+                        handleExcluirCompraProduto(index);
                       }}
                     >
                       <CloseIcon fontSize="small" />

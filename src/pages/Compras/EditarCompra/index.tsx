@@ -66,7 +66,7 @@ function EditarCompra() {
         setCompraSelecionada(jsonResponse);
         setIdTipoPagamento(jsonResponse.id_tipo_pagamento);
         setIdStatusCompra(jsonResponse.id_status_compra);
-        setTotal(jsonResponse.total);
+        setTotal(Number(jsonResponse.total));
         setArrayCompraProduto(
           jsonResponse.tb_produtos.map((produto: any) => {
             return [
@@ -116,6 +116,10 @@ function EditarCompra() {
       if (response) {
         const produtosJson = await response.json();
         setListaProdutos(produtosJson);
+        setPrecoSelecionado(
+          (produtosJson.filter((produto: any) => produto.id_produto === 1)[0]
+            .preco)
+        );
         setCompraFound(true);
       }
     }
@@ -295,7 +299,7 @@ function EditarCompra() {
                           aria-label="close"
                           color="error"
                           onClick={() => {
-                            handleExcluirCompraProduto(compraProduto);
+                            handleExcluirCompraProduto(index);
                           }}
                         >
                           <CloseIcon fontSize="small" />
@@ -382,12 +386,15 @@ function EditarCompra() {
         let jsonResponse = await response.json();
 
         Promise.all(
-          arrayCompraProduto.map(
-            (compraProduto: any) =>
+          compraSelecionada.tb_produtos.map(
+            (produto: any) =>
               new Promise((resolve, reject) => {
-                fetch(`${apiEndpoints.compraProduto}/${id}`, {
-                  method: "DELETE",
-                });
+                fetch(
+                  `${apiEndpoints.compraProduto}/${produto.tb_compra_produto.id_compra_produto}`,
+                  {
+                    method: "DELETE",
+                  }
+                );
               })
           )
         )
@@ -465,10 +472,9 @@ function EditarCompra() {
 
   function handleProdutoSelecionado(event: any) {
     setProdutoSelecionado(event.target.value);
-    console.log(produtoSelecionado);
     setPrecoSelecionado(
       listaProdutos.filter(
-        (produto: any) => produto.id_produto === produtoSelecionado
+        (produto: any) => produto.id_produto === event.target.value
       )[0].preco
     );
   }
@@ -495,27 +501,18 @@ function EditarCompra() {
       ...arrayCompraProduto,
       [produtoSelecionado, qtdSelecionada, Date.now()],
     ]);
-    setTotal(total + precoSelecionado * qtdSelecionada);
+    setTotal(total + Number(precoSelecionado) * Number(qtdSelecionada));
   }
 
-  function handleExcluirCompraProduto(compraProduto: any) {
-    let locationArray = arrayCompraProduto.indexOf(compraProduto);
+  function handleExcluirCompraProduto(index: any) {
+    let newArrayCompraProduto = arrayCompraProduto;
+    newArrayCompraProduto.splice(index, 1);
 
-    let newArrayCompraProduto = arrayCompraProduto.splice(
-      locationArray,
-      locationArray
-    );
+    console.log(newArrayCompraProduto);
 
     setArrayCompraProduto(newArrayCompraProduto);
 
-    let novoTotal = arrayCompraProduto.reduce((acc: number, cur: any) => {
-      console.log(
-        "Preço: " +
-          Number(
-            listaProdutos.find((produto: any) => produto.id_produto === cur[0])
-              .preco
-          )
-      );
+    let novoTotal = newArrayCompraProduto.reduce((acc: number, cur: any) => {
       return (
         acc +
         cur[1] *
