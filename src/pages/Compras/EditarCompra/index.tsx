@@ -116,10 +116,9 @@ function EditarCompra() {
       if (response) {
         const produtosJson = await response.json();
         setListaProdutos(produtosJson);
+        setProdutoSelecionado(produtosJson[0].id_produto)
         setPrecoSelecionado(
-          (produtosJson.filter((produto: any) => produto.id_produto === 1)[0]
-            .preco)
-        );
+          produtosJson[0].preco);
         setCompraFound(true);
       }
     }

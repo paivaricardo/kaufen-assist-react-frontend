@@ -82,10 +82,9 @@ function CriarCompra() {
       if (response) {
         const produtosJson = await response.json();
         setListaProdutos(produtosJson);
+        setProdutoSelecionado(produtosJson[0].id_produto)
         setPrecoSelecionado(
-          produtosJson.filter((produto: any) => produto.id_produto === 1)[0]
-            .preco
-        );
+          produtosJson[0].preco);
       }
     }
 
@@ -399,7 +398,7 @@ function CriarCompra() {
                   </TableCell>
                   <TableCell align="right">{compraProduto[1]}</TableCell>
                   <TableCell align="right">
-                    {listaProdutos.find(
+                    R$ {listaProdutos.find(
                       (produto: any) => produto.id_produto === compraProduto[0]
                     ).preco * compraProduto[1]}
                   </TableCell>
